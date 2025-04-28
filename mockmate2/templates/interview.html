@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MockMate - AI Interview</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="interview-page">
+  <div class="interview-container">
+    <header class="interview-header">
+      <div class="logo-small">
+        <i class="fas fa-robot"></i>
+        <span>MockMate</span>
+      </div>
+      <div class="interview-status">
+        <div class="status-indicator" id="statusIndicator">
+          <span class="status-dot"></span>
+          <span class="status-text">Ready</span>
+        </div>
+      </div>
+      <div class="interview-controls">
+        <button id="endInterviewBtn">
+          <i class="fas fa-times"></i>
+          <span>End Interview</span>
+        </button>
+      </div>
+    </header>
+    
+    <div class="chat-container" id="chatContainer">
+      <!-- Messages will be added here dynamically -->
+    </div>
+    
+    <div class="voice-controls">
+      <button id="recordBtn" class="record-button">
+        <i class="fas fa-microphone"></i>
+        <span>Speak Now</span>
+      </button>
+      <div class="recording-indicator hidden" id="recordingIndicator">
+        <div class="recording-waves">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <p>Listening...</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="interview-complete-modal hidden" id="interviewCompleteModal">
+    <div class="modal-content">
+      <i class="fas fa-check-circle modal-icon"></i>
+      <h2>Interview Complete!</h2>
+      <p>Thank you for using MockMate for your interview practice.</p>
+      <div class="modal-buttons">
+        <button id="newInterviewBtn" class="primary-button">
+          <i class="fas fa-redo"></i> New Interview
+        </button>
+        <button id="homeBtn" class="secondary-button">
+          <i class="fas fa-home"></i> Go Home
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const socket = io();
+      const chatContainer = document.getElementById('chatContainer');
+      const recordBtn = document.getElementById('recordBtn');
+      const statusIndicator = document.getElementById('statusIndicator');
+      const recordingIndicator = document.getElementById('recordingIndicator');
+      const endInterviewBtn = document.getElementById('endInterviewBtn');
+      const interviewCompleteModal = document.getElementById('interviewCompleteModal');
+      const newInterviewBtn = document.getElementById('newInterviewBtn');
+      const homeBtn = document.getElementById('homeBtn');
+      
+      let currentQuestionIndex = 0;
+      const questions = {{ questions|tojson }};
+      
+      // Helper to add message to chat
+      function addMessage(text, sender, isQuestion = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', sender);
+        
+        if (sender === 'bot' && isQuestion) {
+          messageDiv.classList.add('question');
+        }
+        
+        messageDiv.textContent = text;
+        chatContainer.appendChild(messageDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+      
+      // Add feedback under user message
+      function addFeedback(text) {
+        const feedbackDiv = document.createElement('div');
+        feedbackDiv.classList.add('feedback');
+        feedbackDiv.textContent = text;
+        chatContainer.appendChild(feedbackDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+      
+      // Handle socket events
+      socket.on('connect', () => {
+        updateStatus('Connected', 'connected');
+        socket.emit('start_interview');
+      });
+      
+      socket.on('bot_message', (message) => {
+        addMessage(message, 'bot', message === questions[currentQuestionIndex]);
+      });
+      
+      socket.on('user_message', (message) => {
+        addMessage(message, 'user');
+      });
+      
+      socket.on('feedback', (feedback) => {
+        addFeedback(feedback);
+      });
+      
+      socket.on('current_question', (data) => {
+        currentQuestionIndex = data.index;
+      });
+      
+      socket.on('listening_status', (data) => {
+        if (data.status === 'active') {
+          recordingIndicator.classList.remove('hidden');
+          recordBtn.classList.add('hidden');
+          updateStatus('Listening', 'listening');
+        } else {
+          recordingIndicator.classList.add('hidden');
+          recordBtn.classList.remove('hidden');
+          updateStatus('Ready', 'connected');
+        }
+      });
+      
+      socket.on('interview_complete', () => {
+        setTimeout(() => {
+          interviewCompleteModal.classList.remove('hidden');
+        }, 2000);
+      });
+      
+      // Update status indicator
+      function updateStatus(text, statusClass) {
+        const statusText = statusIndicator.querySelector('.status-text');
+        statusText.textContent = text;
+        statusIndicator.className = 'status-indicator ' + statusClass;
+      }
+      
+      // Button event handlers
+      recordBtn.addEventListener('click', () => {
+        socket.emit('start_recording', { index: currentQuestionIndex });
+      });
+      
+      endInterviewBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to end this interview?')) {
+          window.location.href = '/';
+        }
+      });
+      
+      newInterviewBtn.addEventListener('click', () => {
+        window.location.reload();
+      });
+      
+      homeBtn.addEventListener('click', () => {
+        window.location.href = '/';
+      });
+    });
+  </script>
+</body>
+</html>

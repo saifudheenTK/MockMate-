@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MockMate - AI Interview Practice</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="landing-container">
+        <div class="logo-area">
+            <i class="fas fa-robot logo-icon"></i>
+            <h1>MockMate</h1>
+            <p class="tagline">Your AI-powered interview coach</p>
+        </div>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-prompt">
+                <i class="fas fa-file-pdf upload-icon"></i>
+                <p>Upload your resume to begin</p>
+                <p class="small-text">PDF format only</p>
+            </div>
+            
+            <form id="resumeForm" class="hidden">
+                <input type="file" id="resumeFile" name="resume" accept=".pdf" required>
+                <button type="button" id="uploadButton">
+                    <i class="fas fa-upload"></i> Upload Resume
+                </button>
+            </form>
+        </div>
+        
+        <div class="status-area hidden" id="statusArea">
+            <div class="loader"></div>
+            <p id="statusMessage">Processing your resume...</p>
+        </div>
+        
+        <div class="start-area hidden" id="startArea">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <p>Resume uploaded successfully!</p>
+            <button id="startButton" class="primary-button">
+                <i class="fas fa-microphone"></i> Start Interview
+            </button>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2025 MockMate - Practice Makes Perfect</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const resumeForm = document.getElementById('resumeForm');
+            const statusArea = document.getElementById('statusArea');
+            const startArea = document.getElementById('startArea');
+            const statusMessage = document.getElementById('statusMessage');
+            const resumeFile = document.getElementById('resumeFile');
+            const uploadButton = document.getElementById('uploadButton');
+            const startButton = document.getElementById('startButton');
+            
+            // Show file input when upload area is clicked
+            uploadArea.addEventListener('click', function() {
+                resumeForm.classList.remove('hidden');
+                resumeFile.click();
+            });
+            
+            // Handle file selection
+            resumeFile.addEventListener('change', function() {
+                if (resumeFile.files.length > 0) {
+                    const fileName = resumeFile.files[0].name;
+                    uploadButton.innerHTML = `<i class="fas fa-upload"></i> ${fileName}`;
+                    uploadButton.classList.add('file-selected');
+                }
+            });
+            
+            // Handle resume upload
+            uploadButton.addEventListener('click', function() {
+                if (resumeFile.files.length === 0) {
+                    alert('Please select a resume file first');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('resume', resumeFile.files[0]);
+                
+                // Show loading state
+                uploadArea.classList.add('hidden');
+                statusArea.classList.remove('hidden');
+                
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    statusArea.classList.add('hidden');
+                    
+                    if (data.status === 'success') {
+                        startArea.classList.remove('hidden');
+                    } else {
+                        statusMessage.textContent = data.message;
+                        statusArea.classList.remove('hidden');
+                        setTimeout(() => {
+                            statusArea.classList.add('hidden');
+                            uploadArea.classList.remove('hidden');
+                            resumeForm.classList.add('hidden');
+                        }, 3000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    statusMessage.textContent = 'An error occurred. Please try again.';
+                    setTimeout(() => {
+                        statusArea.classList.add('hidden');
+                        uploadArea.classList.remove('hidden');
+                    }, 3000);
+                });
+            });
+            
+            // Start interview button
+            startButton.addEventListener('click', function() {
+                window.location.href = '/interview';
+            });
+        });
+    </script>
+</body>
+</html>
