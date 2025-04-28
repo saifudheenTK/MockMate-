@@ -1,8 +1,10 @@
-🎤 MockMate — AI Voice-Based Mock Interviewer
+# 🎤 MockMate — AI Voice-Based Mock Interviewer
+
 MockMate is a smart web application that helps candidates practice interviews based on their uploaded resumes.
 It dynamically asks technical questions, listens to voice answers, evaluates them, gives feedback, and shows live bot-user conversation subtitles.
 
-🚀 Features
+# 🚀 Features
+
 📄 Upload your Resume (PDF)
 
 🤖 Dynamic Interview Questions based on Resume
@@ -21,7 +23,8 @@ It dynamically asks technical questions, listens to voice answers, evaluates the
 
 🖥️ Fullstack: Python (Flask) + HTML/CSS/JS + Socket.IO + Whisper + Ollama Llama3
 
-🛠️ Technologies Used
+# 🛠️ Technologies Used
+
 Python 3.12
 
 Flask
@@ -40,6 +43,22 @@ HTML5 / CSS3 / JavaScript
 
 Bootstrap 5 (Frontend UI)
 
-📸 Screenshots
-Upload Resume	Start Interview
-(You can add screenshots later by putting images inside a screenshots/ folder.)
+# 📸 Screenshots
+
+Upload Resume	
+![Screenshot 2025-04-28 101031](https://github.com/user-attachments/assets/ca8f84c8-9cbe-4d76-b22b-68b1a1c56700)
+
+Start Interview
+![Screenshot 2025-04-28 101229](https://github.com/user-attachments/assets/b1a16d33-506c-41f4-bb0b-344172a3ba7c)
+
+
+# 🧑‍💻 Authors
+Saifudheen T.K
+
+Arif Basheer
+
+Gabriel P.S
+
+Muhammad Sabith
+
+
